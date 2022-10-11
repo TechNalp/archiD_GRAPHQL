@@ -36,7 +36,7 @@ def all_movies(_,info):
 
 
 def create_movie(_,info,input):
-    if not input["id"] or not input["title"] or not input["director"] or not (input["rating"] >=0.0 and input["rating"] <=10.0):
+    if not input["id"] or not input["title"] or not input["director"] or not (input["rating"] >=0.0 and input["rating"] <=10.0): # On vérifie la validité des données reçues
         return {"id":"","title":"","director":"","rating":-1}
     with open('{}/data/movies.json'.format("."),"r") as file:
         data = json.load(file)
@@ -45,17 +45,17 @@ def create_movie(_,info,input):
             return {"id": "", "title": "", "director": "", "rating": -1} # Si l'id est déjà pris
     newMovie = {"id": input["id"], "title": input["title"], "director": input["director"], "rating": float(input["rating"])}
     data["movies"].append(newMovie)
-    with open('{}/data/movies.json'.format("."),"w") as file:
+    with open('{}/data/movies.json'.format("."),"w") as file: # On met à jour la bdd
         json.dump(data,file)
     return newMovie
 
 
 def delete_movie(_,info,_id):
-    if not _id:
+    if not _id: # On vérifie la validité de l'id
         return ""
     with open('{}/data/movies.json'.format("."), "r") as file:
         data = json.load(file)
-    for movie in data["movies"]:
+    for movie in data["movies"]: # On cherche le film à supprimer
         if movie["id"] == _id:
             data["movies"].remove(movie)
             with open("{}/data/movies.json".format("."),"w") as file:
@@ -65,11 +65,11 @@ def delete_movie(_,info,_id):
 
 
 def movie_with_title(_,info,_title):
-    if not _title:
+    if not _title: # On vérifie la validté du titre passé
         return {"id": "", "title": "", "director": "", "rating": -1}
     with open('{}/data/movies.json'.format("."), "r") as file:
         data = json.load(file)
-    for movie in data["movies"]:
+    for movie in data["movies"]: # On cherche le film avec le bon titre
         if movie["title"].lower() == _title.lower():
             return movie
     return {"id": "", "title": "", "director": "", "rating": -1}

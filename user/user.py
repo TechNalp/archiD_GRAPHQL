@@ -74,7 +74,10 @@ def get_reservation_details(userid_or_name):
                             if resp.status_code == 200: # On vérifie que la réponse du serveur est valide
                                 resp = resp.json()
                                 resp = resp["data"]["movie_with_id"]
-                                bookingDetails["movies"].append({"title":resp["title"],"rating":resp["rating"],"director":resp["director"],"id":resp["id"]}) # Si la réponse est valide, on ajoute les détails du film à la liste des détails de film pour la date en cours et qui sera utilisé dans la réponse
+                                if resp:
+                                    bookingDetails["movies"].append({"title":resp["title"],"rating":resp["rating"],"director":resp["director"],"id":resp["id"]}) # Si la réponse est valide, on ajoute les détails du film à la liste des détails de film pour la date en cours et qui sera utilisé dans la réponse
+                                else:
+                                    return make_response(jsonify({"error": "impossible de trouver les informations du film ayant l'id : " + movieId}),404)
                             else: # Si le serveur retourne une réponse invalide, c'est que l'un des ids transmis n'est pas valide; on stoppe la recherche et on retourne une erreur
                                 return make_response(jsonify({"error": "impossible de trouver les informations du film ayant l'id : " + movieId}),404)
                         response["bookings"].append(bookingDetails) # Si l'on a réussi à récupérer les détails de tous les films à la date en cours de test, on ajoute tous les détails à la réponse globale et on passe à la recherche pour la date suivante
@@ -94,6 +97,8 @@ def new_booking_byTitle(userid_or_name):
                     resp = graphqlRequest(service["movie"],'{\n movie_with_title(_title:\"'+str(req["movieTitle"])+ '\"){\n id\n }\n }\n')  # On ne récupère que l'id du film grâce à son titre et un appel graphQL
                     if resp.status_code == 200: # On vérifie que la réponse du serveur est valide
                         movieId = str(resp.json()["data"]["movie_with_title"]["id"]) # On stocke l'id du film récupéré
+                        if not movieId:
+                            return make_response(jsonify({"error": "Impossible de trouver l'id du film"}), 404)
                         with grpc.insecure_channel(service["booking"]) as bookingChannel: # On ouvre un canal avec le serveur gRPC hebergeant le service booking
                             stubBooking = booking_pb2_grpc.BookingStub(bookingChannel) # On crée le stub client pour le service booking
                             rep = stubBooking.add_booking_byuser(booking_pb2.AddBooking(userid=userid,date=req["date"],movieid=movieId)) # On crée la réservation avec un appel gRPC

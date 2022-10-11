@@ -41,7 +41,7 @@ def home():
 def playground():
     return PLAYGROUND_HTML, 200
     
-@app.route('/graphql', methods=['POST'])
+@app.route('/graphql', methods=['POST']) # Point d'accès des requête graphql
 def graphql_server():
     data = request.get_json()
     success, result = graphql_sync(
